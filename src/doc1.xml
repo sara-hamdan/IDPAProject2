@@ -1,0 +1,8 @@
+<Department>
+    <Professors>
+        <Professor>John Cramer</Professor>
+    </Professors>
+    <Students>
+        <Student>John Takagi</Student>
+    </Students>
+</Department>
