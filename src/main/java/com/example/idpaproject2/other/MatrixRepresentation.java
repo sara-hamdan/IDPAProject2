@@ -181,7 +181,17 @@ public class MatrixRepresentation {
                     NodeList nodeList2 = document2.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);
                     for (int k = 0; k < nodeList1.getLength(); k++) {
                         if (nodeList1.item(k).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
-                            idf_matrix[i][j] = Math.log(3/1);
+
+                            {
+                                idf_matrix[i][j] = Math.log(3 / 1);
+
+                                for (int l = 0; l < nodeList2.getLength(); l++) {
+                                    if (nodeList2.item(l).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                                        idf_matrix[i][j] = Math.log(3.0/2);
+                                    }
+                                }
+
+                            }
 
                         }
 
@@ -189,11 +199,6 @@ public class MatrixRepresentation {
 
                     }
 
-                    for (int l = 0; l < nodeList2.getLength(); l++) {
-                        if (nodeList2.item(l).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
-                            idf_matrix[i][j] = Math.log(3.0/2);
-                        }
-                    }
 
                 }
             }

@@ -68,7 +68,7 @@ public class Testing {
                     + e.getValue());
 
 
-        mp.IDF_Matrix(document2, document1, mergedIndexingNodes, mergedStructureList);
+        mp.IDF_Matrix(document1, document2, mergedIndexingNodes, mergedStructureList);
 
 
     }
