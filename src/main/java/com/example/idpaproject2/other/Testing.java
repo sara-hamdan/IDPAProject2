@@ -1,9 +1,12 @@
 package com.example.idpaproject2.other;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +62,8 @@ public class Testing {
 
 
         ArrayList<String> mergedStructureList = mp.getMergedStructure(structureList1, structureList2);
+
+
         HashMap<String, Integer> structureMapper = mp.structureLabelling(mp.getUniqueIndexingNodes(mergedStructureList));
 
         for (Map.Entry<String, Integer> e : structureMapper.entrySet())
@@ -69,6 +74,7 @@ public class Testing {
 
 
         mp.IDF_Matrix(document1, document2, mergedIndexingNodes, mergedStructureList);
+
 
 
     }

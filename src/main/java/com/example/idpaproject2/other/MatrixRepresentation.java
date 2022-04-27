@@ -44,13 +44,9 @@ public class MatrixRepresentation {
                 String textualContent = el.getTextContent();
                 String[] tokenizedArr = textualContent.split(" ");
 
-                for (int j = 0; j < tokenizedArr.length; j++) {
-
-
-
-                    if (!(tokenizedArr[j].equalsIgnoreCase("")) && !(tokenizedArr[j].equalsIgnoreCase(" ")))
-                    indexingNodes.add(tokenizedArr[j]);
-
+                for (String s : tokenizedArr) {
+                    if (!(s.equalsIgnoreCase("")) && !(s.equalsIgnoreCase(" ")))
+                        indexingNodes.add(s);
                 }
             }
         } catch (Exception e) {
@@ -121,7 +117,6 @@ public class MatrixRepresentation {
         return new ArrayList<String>(set);
     }
 
-
     public HashMap<String, Integer> indexLabelling(ArrayList<String> indexingNodes) {
 
         HashMap<String, Integer> mapper = new HashMap<>();
@@ -131,9 +126,7 @@ public class MatrixRepresentation {
             mapper.put(indexingNodes.get(i), i);
 
         }
-
         return mapper;
-
     }
 
     public HashMap<String, Integer> structureLabelling(ArrayList<String> structure) {
@@ -148,17 +141,26 @@ public class MatrixRepresentation {
         return mapper;
     }
 
+    public int[][] TF_Matrix(Document document1, ArrayList<String> mergedIndexingNodes, ArrayList<String> mergedStructure) {
+
+        int[][] tf_matrix = new int[getUniqueContext(mergedStructure).size()][getUniqueIndexingNodes(mergedIndexingNodes).size()];
+        ArrayList<String> indexingNodesOf1 = getUniqueIndexingNodes(getIndexingNodes(document1));
+
+        for (int i = 0; i < getUniqueContext(mergedStructure).size(); i++) {
+            for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
 
 
-    public double getTFIDFScore(int TF, double IDF) {
 
-        double TFIDFScore = 1;
+            }
 
-        return TFIDFScore;
+        }
+
+        return tf_matrix;
 
     }
 
-    public void IDF_Matrix(Document document1, Document document2, ArrayList<String> mergedIndexingNodes, ArrayList<String> mergedStructure) {
+
+    public Double[][] IDF_Matrix(Document document1, Document document2, ArrayList<String> mergedIndexingNodes, ArrayList<String> mergedStructure) {
 
         Double[][] idf_matrix = new Double[getUniqueContext(mergedStructure).size()][getUniqueIndexingNodes(mergedIndexingNodes).size()];
         ArrayList<String> indexingNodesOf1 = getUniqueIndexingNodes(getIndexingNodes(document1));
@@ -171,7 +173,7 @@ public class MatrixRepresentation {
 
         for (int i = 0; i < getUniqueContext(mergedStructure).size(); i++) {
             for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
-                if (!findStructureOrIndexingNode(structureOf1, mergedStructure.get(i))) {
+                if (!findStructureOrIndexingNode(structureOf1, getUniqueContext(mergedStructure).get(i))) {
                     idf_matrix[i][j] = 0.0;
                 } else if(!findStructureOrIndexingNode(indexingNodesOf1, mergedIndexingNodes.get(j))) {
                         idf_matrix[i][j] = 0.0;
@@ -182,27 +184,22 @@ public class MatrixRepresentation {
                     for (int k = 0; k < nodeList1.getLength(); k++) {
                         if (nodeList1.item(k).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
 
-                            {
                                 idf_matrix[i][j] = Math.log(3 / 1);
-
                                 for (int l = 0; l < nodeList2.getLength(); l++) {
                                     if (nodeList2.item(l).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
                                         idf_matrix[i][j] = Math.log(3.0/2);
+                                        break;
                                     }
+
                                 }
 
+                              break;
                             }
 
-                        }
-
                         else idf_matrix[i][j] = 0.0;
-
                     }
-
-
                 }
             }
-
         }
         for (int i = 0; i < idf_matrix.length; i++) { //this equals to the row in our matrix.
             for (int j = 0; j < idf_matrix[i].length; j++) { //this equals to the column in each row.
@@ -210,10 +207,7 @@ public class MatrixRepresentation {
             }
             System.out.println(); //change line on console as row comes to end in the matrix.
         }
-
-
-
-
+        return idf_matrix;
     }
 
     public boolean findStructureOrIndexingNode(ArrayList<String> documentList, String indexingNode) {
@@ -221,11 +215,14 @@ public class MatrixRepresentation {
         for(int i = 0; i < documentList.size(); i++) {
 
             if(indexingNode.equalsIgnoreCase(documentList.get(i))) {
+
                 return true;
             }
         }
 
         return false;
-    }
+}
+
+
 
 }

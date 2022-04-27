@@ -1,6 +1,7 @@
 <Department>
     <Professors>
         <Professor>John Cramer</Professor>
+        <Professor>Yuh</Professor>
     </Professors>
     <Students>
         <Student>John Takagi</Student>
