@@ -74,7 +74,18 @@ public class Testing {
 
 
         mp.IDF_Matrix(document1, document2, mergedIndexingNodes, mergedStructureList);
+        mp.TF_Matrix(document1, mergedIndexingNodes, mergedStructureList);
 
+        Double[][] tf_idf_matrix = mp.TF_IDF_Matrix(document1,
+                document2, new int[][] {{1,1}}, new Double[][] {{1.0,1.0}}
+                );
+
+        for (int i = 0; i < tf_idf_matrix.length; i++) { //this equals to the row in our matrix.
+            for (int j = 0; j < tf_idf_matrix[i].length; j++) { //this equals to the column in each row.
+                System.out.print(tf_idf_matrix[i][j] + " ");
+            }
+            System.out.println(); //change line on console as row comes to end in the matrix.
+        }
 
 
     }

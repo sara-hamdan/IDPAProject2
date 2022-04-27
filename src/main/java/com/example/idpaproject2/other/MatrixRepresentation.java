@@ -16,10 +16,7 @@ import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
 import org.xml.sax.SAXException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MatrixRepresentation {
 
@@ -147,14 +144,47 @@ public class MatrixRepresentation {
         ArrayList<String> indexingNodesOf1 = getUniqueIndexingNodes(getIndexingNodes(document1));
 
         for (int i = 0; i < getUniqueContext(mergedStructure).size(); i++) {
+
+
             for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
 
+                NodeList nodeList1 = document1.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);
+                ArrayList<String> terms = new ArrayList<>();
+                Map<String,Integer> hm = new HashMap();
 
+                for (int k = 0; k < nodeList1.getLength(); k++) {
+                    String textualContent = nodeList1.item(k).getTextContent();
+                    String[] tokenizedArr = textualContent.split(" ");
 
+                    for (String s : tokenizedArr) {
+                        terms.add(s);
+                    }
+
+                }
+
+                for(String x:terms){
+
+                    if(!hm.containsKey(x)){
+                        hm.put(x,1);
+                    }else{
+                        hm.put(x, hm.get(x)+1);
+                    }
+                }
+                System.out.println(hm);
+                if(!hm.containsKey(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                    tf_matrix[i][j] = 0;
+                }
+                else tf_matrix[i][j] = hm.get(getUniqueIndexingNodes(mergedIndexingNodes).get(j));
+            }
             }
 
-        }
 
+        for (int i = 0; i < tf_matrix.length; i++) { //this equals to the row in our matrix.
+            for (int j = 0; j < tf_matrix[i].length; j++) { //this equals to the column in each row.
+                System.out.print(tf_matrix[i][j] + " ");
+            }
+            System.out.println(); //change line on console as row comes to end in the matrix.
+        }
         return tf_matrix;
 
     }
@@ -190,9 +220,7 @@ public class MatrixRepresentation {
                                         idf_matrix[i][j] = Math.log(3.0/2);
                                         break;
                                     }
-
                                 }
-
                               break;
                             }
 
@@ -210,6 +238,24 @@ public class MatrixRepresentation {
         return idf_matrix;
     }
 
+    public Double[][] TF_IDF_Matrix(Document document1, Document document2,int[][] tf_matrix, Double[][] idf_matrix) {
+        ArrayList<String> structureList1 = new ArrayList<>();
+        ArrayList<String> structureList2 = new ArrayList<>();
+        StringBuilder str1 = new StringBuilder();
+        StringBuilder str2 = new StringBuilder();
+        tf_matrix = TF_Matrix(document1, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2)));
+        idf_matrix = IDF_Matrix(document1, document2, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document1.getDocumentElement(), str2, structureList2)));
+
+        Double[][] TF_IDF_Matrix = new Double[getUniqueContext(getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2))).size()][getUniqueIndexingNodes(getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2))).size()];
+
+        for(int i = 0; i < TF_IDF_Matrix.length; i++) {
+            for(int j = 0; j < TF_IDF_Matrix[i].length; j++) {
+                TF_IDF_Matrix[i][j] = tf_matrix[i][j]*idf_matrix[i][j];
+            }
+        }
+
+        return TF_IDF_Matrix;
+    }
     public boolean findStructureOrIndexingNode(ArrayList<String> documentList, String indexingNode) {
 
         for(int i = 0; i < documentList.size(); i++) {
