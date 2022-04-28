@@ -1,8 +1,5 @@
 package com.example.idpaproject2.other;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
@@ -11,11 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.TreeWalker;
-import org.xml.sax.SAXException;
-import java.io.File;
+
 import java.util.*;
 
 public class MatrixRepresentation {
@@ -25,8 +18,7 @@ public class MatrixRepresentation {
 
 
         JDOMParser parser = new JDOMParser(inputFile);
-        Document document = parser.DOMParser();
-        return document;
+        return parser.DOMParser();
     }
 
     public ArrayList<String> getIndexingNodes(Document document) {
@@ -54,16 +46,31 @@ public class MatrixRepresentation {
 
     }
 
+    public ArrayList<String> getLeafNodes(Document document) {
+
+        ArrayList<String> leafNodes = new ArrayList<>();
+
+        try {
+            final XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//*[count(./*) = 0]");
+            final NodeList nodeList = (NodeList) xpath.evaluate(document, XPathConstants.NODESET);
+            for(int i = 0; i < nodeList.getLength(); i++) {
+                Element el = (Element) nodeList.item(i);
+                leafNodes.add(el.getNodeName());
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return leafNodes;
+
+    }
     public ArrayList<String> getMergedIndexingNodes(ArrayList<String> arr1, ArrayList<String> arr2) {
 
         ArrayList<String> mergedIndexingNodes = new ArrayList<>();
-        for(int i = 0; i < arr1.size(); i++) {
-            mergedIndexingNodes.add(arr1.get(i));
-        }
+        mergedIndexingNodes.addAll(arr1);
 
-        for(int i = 0; i < arr2.size(); i++) {
-            mergedIndexingNodes.add(arr2.get(i));
-        }
+        mergedIndexingNodes.addAll(arr2);
 
         return mergedIndexingNodes;
     }
@@ -285,7 +292,7 @@ public class MatrixRepresentation {
 
     public Double computeDenomCosine(Double[][] tf_idf_1, Double[][] tf_idf_2) {
 
-        Double DenomCosine = 0.0;
+        Double DenomCosine;
         Double sumSquareWeights1 = 0.0;
         Double sumSquareWeights2 = 0.0;
 
@@ -308,8 +315,7 @@ public class MatrixRepresentation {
 
     public Double computeCosineSim(Double num, Double denom) {
 
-        Double cosineSim = num/denom;
-        return cosineSim;
+        return num/denom;
     }
 
 

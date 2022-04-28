@@ -20,10 +20,29 @@ public class Testing {
     public static void main(String[] args) throws ParserConfigurationException, XPathExpressionException {
 
         MatrixRepresentation mp = new MatrixRepresentation();
-        Document document1 = mp.parseXML("src/doc1.xml");
-        Document document2 = mp.parseXML("src/doc2.xml");
+        Document document1 = mp.parseXML("src/XMLDocuments/doc1.xml");
+        Document document2 = mp.parseXML("src/XMLDocuments/doc2.xml");
+
+        Indexing index = new Indexing();
+        ArrayList<String> arrayList = index.indexingTerms();
+        HashMap<String, ArrayList<String>> indexMap = index.getIndexingTable(arrayList);
+
+        for (Map.Entry<String, ArrayList<String>> e : indexMap.entrySet()) {
+            System.out.print(e.getKey() + ": ");
+
+            for(String doc: e.getValue())
+            {
+                System.out.print(doc + " ");
+            }
+
+            System.out.println();
 
 
+        }
+
+        for(String s: arrayList) {
+            System.out.print(s + " ");
+        }
 
         ArrayList<String> indexingNodes1 = mp.getIndexingNodes(document1);
         ArrayList<String> indexingNodes2 = mp.getIndexingNodes(document2);
