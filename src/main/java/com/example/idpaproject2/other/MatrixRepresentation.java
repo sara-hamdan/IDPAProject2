@@ -205,7 +205,7 @@ public class MatrixRepresentation {
             for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
                 if (!findStructureOrIndexingNode(structureOf1, getUniqueContext(mergedStructure).get(i))) {
                     idf_matrix[i][j] = 0.0;
-                } else if(!findStructureOrIndexingNode(indexingNodesOf1, mergedIndexingNodes.get(j))) {
+                } else if(!findStructureOrIndexingNode(indexingNodesOf1, getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
                         idf_matrix[i][j] = 0.0;
                     }
                 else {
@@ -239,14 +239,14 @@ public class MatrixRepresentation {
     }
 
     public Double[][] TF_IDF_Matrix(Document document1, Document document2,int[][] tf_matrix, Double[][] idf_matrix) {
-        ArrayList<String> structureList1 = new ArrayList<>();
-        ArrayList<String> structureList2 = new ArrayList<>();
-        StringBuilder str1 = new StringBuilder();
-        StringBuilder str2 = new StringBuilder();
-        tf_matrix = TF_Matrix(document1, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2)));
-        idf_matrix = IDF_Matrix(document1, document2, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document1.getDocumentElement(), str2, structureList2)));
+        //ArrayList<String> structureList1 = new ArrayList<>();
+       // ArrayList<String> structureList2 = new ArrayList<>();
+       // StringBuilder str1 = new StringBuilder();
+       // StringBuilder str2 = new StringBuilder();
+       // tf_matrix = TF_Matrix(document1, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2)));
+      //  idf_matrix = IDF_Matrix(document1, document2, getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2)), getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2)));
 
-        Double[][] TF_IDF_Matrix = new Double[getUniqueContext(getMergedStructure(getContext(document1.getDocumentElement(), str1, structureList1), getContext(document2.getDocumentElement(), str2, structureList2))).size()][getUniqueIndexingNodes(getMergedIndexingNodes(getIndexingNodes(document1), getIndexingNodes(document2))).size()];
+        Double[][] TF_IDF_Matrix = new Double[tf_matrix.length][tf_matrix[0].length];
 
         for(int i = 0; i < TF_IDF_Matrix.length; i++) {
             for(int j = 0; j < TF_IDF_Matrix[i].length; j++) {
@@ -269,6 +269,48 @@ public class MatrixRepresentation {
         return false;
 }
 
+        public Double computeNumCosine(Double[][] tf_idf_1, Double[][] tf_idf_2) {
+
+         Double NumCosine = 0.0;
+
+         for(int i = 0; i < tf_idf_1.length; i++) {
+             for(int j = 0; j < tf_idf_1[i].length; j++) {
+                 NumCosine += tf_idf_1[i][j]*tf_idf_2[i][j];
+             }
+         }
+
+         return NumCosine;
+        }
+
+
+    public Double computeDenomCosine(Double[][] tf_idf_1, Double[][] tf_idf_2) {
+
+        Double DenomCosine = 0.0;
+        Double sumSquareWeights1 = 0.0;
+        Double sumSquareWeights2 = 0.0;
+
+        for(int i = 0; i < tf_idf_1.length; i++) {
+            for(int j = 0; j < tf_idf_1[i].length; j++) {
+                sumSquareWeights1 += tf_idf_1[i][j]*tf_idf_1[i][j];
+            }
+        }
+
+        for(int i = 0; i < tf_idf_2.length; i++) {
+            for(int j = 0; j < tf_idf_2[i].length; j++) {
+                sumSquareWeights2 += tf_idf_2[i][j]*tf_idf_2[i][j];
+            }
+        }
+
+        DenomCosine = Math.sqrt(sumSquareWeights1*sumSquareWeights2);
+
+        return DenomCosine;
+    }
+
+    public Double computeCosineSim(Double num, Double denom) {
+
+        Double cosineSim = num/denom;
+        return cosineSim;
+    }
 
 
 }

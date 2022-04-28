@@ -76,9 +76,9 @@ public class Testing {
         mp.IDF_Matrix(document1, document2, mergedIndexingNodes, mergedStructureList);
         mp.TF_Matrix(document1, mergedIndexingNodes, mergedStructureList);
 
+
         Double[][] tf_idf_matrix = mp.TF_IDF_Matrix(document1,
-                document2, new int[][] {{1,1}}, new Double[][] {{1.0,1.0}}
-                );
+                        document2, mp.TF_Matrix(document1, mergedIndexingNodes, mergedStructureList), mp.IDF_Matrix(document1, document2, mergedIndexingNodes, mergedStructureList));
 
         for (int i = 0; i < tf_idf_matrix.length; i++) { //this equals to the row in our matrix.
             for (int j = 0; j < tf_idf_matrix[i].length; j++) { //this equals to the column in each row.
@@ -86,6 +86,22 @@ public class Testing {
             }
             System.out.println(); //change line on console as row comes to end in the matrix.
         }
+
+        Double[][] tf_idf_matrix2 = mp.TF_IDF_Matrix(document2,
+                        document1, mp.TF_Matrix(document2,mergedIndexingNodes, mergedStructureList), mp.IDF_Matrix(document2, document1, mergedIndexingNodes, mergedStructureList));
+
+
+        for (int i = 0; i < tf_idf_matrix2.length; i++) { //this equals to the row in our matrix.
+            for (int j = 0; j < tf_idf_matrix2[i].length; j++) { //this equals to the column in each row.
+                System.out.print(tf_idf_matrix2[i][j] + " ");
+            }
+            System.out.println(); //change line on console as row comes to end in the matrix.
+        }
+
+        Double sim = mp.computeCosineSim(mp.computeNumCosine(tf_idf_matrix, tf_idf_matrix2), mp.computeDenomCosine(tf_idf_matrix, tf_idf_matrix2) );
+        System.out.println(sim);
+
+
 
 
     }
