@@ -6,6 +6,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,17 +17,21 @@ import java.util.Map;
 
 public class Testing {
 
-    public static void main(String[] args) throws ParserConfigurationException {
+    public static void main(String[] args) throws ParserConfigurationException, XPathExpressionException {
 
         MatrixRepresentation mp = new MatrixRepresentation();
         Document document1 = mp.parseXML("src/doc1.xml");
         Document document2 = mp.parseXML("src/doc2.xml");
+
+
+
         ArrayList<String> indexingNodes1 = mp.getIndexingNodes(document1);
         ArrayList<String> indexingNodes2 = mp.getIndexingNodes(document2);
 
         for(int i = 0; i < indexingNodes1.size(); i++) {
             System.out.println(indexingNodes1.get(i) + " ");
         }
+
 
         System.out.println();
 
@@ -100,9 +108,6 @@ public class Testing {
 
         Double sim = mp.computeCosineSim(mp.computeNumCosine(tf_idf_matrix, tf_idf_matrix2), mp.computeDenomCosine(tf_idf_matrix, tf_idf_matrix2) );
         System.out.println(sim);
-
-
-
 
     }
 
