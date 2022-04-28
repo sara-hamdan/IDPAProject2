@@ -27,6 +27,7 @@ public class Testing {
         ArrayList<String> arrayList = index.indexingTerms();
         HashMap<String, ArrayList<String>> indexMap = index.getIndexingTable(arrayList);
 
+
         for (Map.Entry<String, ArrayList<String>> e : indexMap.entrySet()) {
             System.out.print(e.getKey() + ": ");
 
@@ -36,15 +37,38 @@ public class Testing {
             }
 
             System.out.println();
-
-
         }
+
+        String query = "Student John Takagi Movie";
+
+        ArrayList<String> documents = index.searchInTable(query, indexMap);
+
+         for(String document: documents) {
+             System.out.print(document + " ");
+         }
+
+        System.out.println();
 
         for(String s: arrayList) {
             System.out.print(s + " ");
         }
 
-        ArrayList<String> indexingNodes1 = mp.getIndexingNodes(document1);
+        System.out.println();
+
+        int[] query_TF_Matrix = index.query_TF_Matrix(query, arrayList);
+        HashMap<String, Double> ranked = index.rankedSimilarityMap(index.getSimilarity(query_TF_Matrix, index.getDocumentMatrices(documents, arrayList, indexMap)));
+
+        for (Map.Entry<String, Double> e : ranked.entrySet())
+
+            // Printing key-value pairs
+            System.out.println(e.getKey() + " "
+                    + e.getValue());
+
+
+        System.out.println();
+
+
+            ArrayList<String> indexingNodes1 = mp.getIndexingNodes(document1);
         ArrayList<String> indexingNodes2 = mp.getIndexingNodes(document2);
 
         for(int i = 0; i < indexingNodes1.size(); i++) {

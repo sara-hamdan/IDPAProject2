@@ -151,8 +151,6 @@ public class MatrixRepresentation {
         ArrayList<String> indexingNodesOf1 = getUniqueIndexingNodes(getIndexingNodes(document1));
 
         for (int i = 0; i < getUniqueContext(mergedStructure).size(); i++) {
-
-
             for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
 
                 NodeList nodeList1 = document1.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);

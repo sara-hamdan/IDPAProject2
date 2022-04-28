@@ -9,10 +9,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Indexing {
 
@@ -89,4 +86,115 @@ public class Indexing {
         }
         return indexMap;
     }
+
+    public ArrayList<String> searchInTable(String query, HashMap<String, ArrayList<String>> indexMap) {
+
+        String[] tokenizedQuery = query.split(" ");
+        ArrayList<String> documents = new ArrayList<>();
+
+        for(String token: tokenizedQuery) {
+
+            if(indexMap.containsKey(token)) {
+                documents.addAll(indexMap.get(token));
+            }
+        }
+
+        Set<String> documentSet = new LinkedHashSet<>(documents);
+        return new ArrayList<String>(documentSet);
+
+    }
+
+    public HashMap <String, int[]> getDocumentMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) {
+
+
+       HashMap <String, int[]> tf_matrices_map = new HashMap <String, int[]>();
+        for(String document: documentSet) {
+            int[] TF_Matrix = new int[indexingTerms.size()];
+            for(int i = 0; i < indexingTerms.size(); i++) {
+                if(indexMap.get(indexingTerms.get(i)).contains(document)) {
+                    TF_Matrix[i] = 1;
+                }
+            }
+
+            tf_matrices_map.put(document, TF_Matrix);
+        }
+
+        return tf_matrices_map;
+    }
+
+    public int[] query_TF_Matrix(String query, ArrayList<String> indexingTerms) {
+
+        int[] query_TF_Matrix = new int[indexingTerms.size()];
+
+        for(int i = 0; i < indexingTerms.size(); i++) {
+            if(query.contains(indexingTerms.get(i))) {
+                query_TF_Matrix[i] = 1;
+            }
+        }
+
+        return query_TF_Matrix;
+
+    }
+
+    public HashMap<String, Double> getSimilarity(int[] query_TF_Matrix, HashMap<String, int[]> TF_matrices_map) {
+
+        HashMap<String, Double> similarityMap = new HashMap<>();
+        double squareSumQuery = 0;
+        for(int i = 0; i < query_TF_Matrix.length; i++) {
+            squareSumQuery += Math.pow(query_TF_Matrix[i], 2);
+        }
+
+        for (Map.Entry<String, int[]> e : TF_matrices_map.entrySet()) {
+            int[] multiplied = new int[query_TF_Matrix.length];
+            int[] oneDocumentMatrix = e.getValue();
+            double squareSumDocument = 0.0;
+            Double cosineSim;
+            int sum = 0;
+            for(int i = 0; i <oneDocumentMatrix.length; i++) {
+                multiplied[i] = query_TF_Matrix[i]*oneDocumentMatrix[i];
+            }
+            for(int i = 0; i < multiplied.length; i++) {
+                sum += multiplied[i];
+            }
+            for(int i = 0; i < oneDocumentMatrix.length; i++) {
+                squareSumDocument += Math.pow(oneDocumentMatrix[i], 2);
+            }
+
+            cosineSim = sum/Math.sqrt(squareSumQuery*squareSumDocument);
+
+            similarityMap.put(e.getKey(), cosineSim);
+        }
+
+        return similarityMap;
+
+    }
+
+    public HashMap<String, Double> rankedSimilarityMap(HashMap<String, Double> similarityMap) {
+
+
+        // Create a list from elements of HashMap
+        List<Map.Entry<String, Double> > list =
+                new LinkedList<Map.Entry<String, Double> >(similarityMap.entrySet());
+
+        // Sort the list
+        Collections.sort(list, new Comparator<Map.Entry<String, Double> >() {
+            public int compare(Map.Entry<String, Double> o1,
+                               Map.Entry<String, Double> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+
+        LinkedHashMap<String, Double> rankedSimMap = new LinkedHashMap<>();
+
+//Use Comparator.reverseOrder() for reverse ordering
+        similarityMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .forEachOrdered(x -> rankedSimMap.put(x.getKey(), x.getValue()));
+
+        return rankedSimMap;
+    }
+
+
 }
