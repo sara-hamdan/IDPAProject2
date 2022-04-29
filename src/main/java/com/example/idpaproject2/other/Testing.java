@@ -26,7 +26,7 @@ public class Testing {
         Indexing index = new Indexing();
 
 
-        String query = "Student John Takagi Movie Hello";
+        String query = "actor Jennifer Lawrence Movie";
 
         ArrayList<String> arrayList = index.indexingTerms(query);
         HashMap<String, ArrayList<String>> indexMap = index.getIndexingTable(arrayList);
