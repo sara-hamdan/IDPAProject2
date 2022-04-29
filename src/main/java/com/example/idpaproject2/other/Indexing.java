@@ -45,7 +45,7 @@ public class Indexing {
         return stringBuilder;
     }
 
-    public ArrayList<String> indexingTerms() throws XPathExpressionException {
+    public ArrayList<String> indexingTerms(String query) throws XPathExpressionException {
 
         ArrayList<String> terms = new ArrayList<>();
 
@@ -60,6 +60,7 @@ public class Indexing {
                 terms.addAll(mp.getLeafNodes(document));
             }
         }
+        terms.addAll(List.of(query.split(" ")));
         Set<String> set = new LinkedHashSet<>(terms);
         return new ArrayList<String>(set);
     }
@@ -121,6 +122,8 @@ public class Indexing {
 
         return tf_matrices_map;
     }
+
+
 
     public int[] query_TF_Matrix(String query, ArrayList<String> indexingTerms) {
 

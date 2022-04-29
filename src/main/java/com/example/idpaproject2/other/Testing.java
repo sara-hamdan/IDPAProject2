@@ -24,7 +24,11 @@ public class Testing {
         Document document2 = mp.parseXML("src/XMLDocuments/doc2.xml");
 
         Indexing index = new Indexing();
-        ArrayList<String> arrayList = index.indexingTerms();
+
+
+        String query = "Student John Takagi Movie Hello";
+
+        ArrayList<String> arrayList = index.indexingTerms(query);
         HashMap<String, ArrayList<String>> indexMap = index.getIndexingTable(arrayList);
 
 
@@ -38,8 +42,6 @@ public class Testing {
 
             System.out.println();
         }
-
-        String query = "Student John Takagi Movie";
 
         ArrayList<String> documents = index.searchInTable(query, indexMap);
 
