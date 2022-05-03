@@ -11,22 +11,23 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Testing {
 
-    public static void main(String[] args) throws ParserConfigurationException, XPathExpressionException {
+    public static void main(String[] args) throws ParserConfigurationException, XPathExpressionException, IOException {
 
         MatrixRepresentation mp = new MatrixRepresentation();
-        Document document1 = mp.parseXML("src/XMLDocuments/doc1.xml");
-        Document document2 = mp.parseXML("src/XMLDocuments/doc2.xml");
+        Document document1 = mp.parseXML("src/XMLDocuments/doc5.xml");
+        Document document2 = mp.parseXML("src/XMLDocuments/doc6.xml");
 
         Indexing index = new Indexing();
 
 
-        String query = "actor Jennifer Lawrence Movie";
+        String query = "I eat apples";
 
         ArrayList<String> arrayList = index.indexingTerms(query);
         HashMap<String, ArrayList<String>> indexMap = index.getIndexingTable(arrayList);
@@ -81,7 +82,7 @@ public class Testing {
         System.out.println();
 
         for(int i = 0; i < indexingNodes2.size(); i++) {
-            System.out.print(indexingNodes1.get(i) + " ");
+            System.out.print(indexingNodes2.get(i) + " ");
         }
 
         ArrayList<String> structureList1 = new ArrayList<>();

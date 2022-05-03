@@ -9,20 +9,40 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Indexing {
 
     MatrixRepresentation mp = new MatrixRepresentation();
 
-    public StringBuilder flattenXMLWithStructure(Document document) throws XPathExpressionException {
+    public StringBuilder flattenXMLWithStructure(Document document) throws XPathExpressionException, IOException {
+
+
+            PorterStemmer stemmer = new PorterStemmer();
+
 
         final XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//*[count(./*) = 0]");
         final NodeList nodeList = (NodeList) xpath.evaluate(document, XPathConstants.NODESET);
         StringBuilder stringBuilder = new StringBuilder();
         for(int i = 0; i < nodeList.getLength(); i++) {
             Element el = (Element) nodeList.item(i);
-            stringBuilder.append(el.getNodeName() + ": " + el.getTextContent() + " \n");
+            stringBuilder.append(stemmer.stem(el.getNodeName().toLowerCase()) + ": ");
+            ArrayList<String> tokenizedArr =
+                    Stream.of((el.getTextContent().toLowerCase()).split(" "))
+                            .collect(Collectors.toCollection(ArrayList<String>::new));
+            tokenizedArr.removeAll(loadStopwords());
+
+            for(String token : tokenizedArr) {
+                String stemmedWord = stemmer.stem(token);
+                stringBuilder.append(stemmedWord + " "  );
+            }
+
+            stringBuilder.append("\n");
 
         }
         System.out.println(stringBuilder.toString());
@@ -45,7 +65,14 @@ public class Indexing {
         return stringBuilder;
     }
 
-    public ArrayList<String> indexingTerms(String query) throws XPathExpressionException {
+    public List<String> loadStopwords() throws IOException {
+
+        List<String> stopwords = Files.readAllLines(Paths.get("src/english_stopwords.txt"));
+        return stopwords;
+    }
+
+
+    public ArrayList<String> indexingTerms(String query) throws XPathExpressionException, IOException {
 
         ArrayList<String> terms = new ArrayList<>();
 
@@ -60,11 +87,25 @@ public class Indexing {
                 terms.addAll(mp.getLeafNodes(document));
             }
         }
-        terms.addAll(List.of(query.split(" ")));
+
+        ArrayList<String> tokenizedQuery =
+                Stream.of(query.toLowerCase().split(" "))
+                        .collect(Collectors.toCollection(ArrayList<String>::new));
+
+        tokenizedQuery.removeAll(loadStopwords());
+
+        for(String token : tokenizedQuery) {
+
+            PorterStemmer stemmer = new PorterStemmer();
+            String stemmedWord = stemmer.stem(token);
+
+        }
+         //get the stemmed word
+        terms.addAll(tokenizedQuery);
         Set<String> set = new LinkedHashSet<>(terms);
         return new ArrayList<String>(set);
     }
-    public HashMap<String, ArrayList<String>> getIndexingTable(ArrayList<String> indexingTerms) throws XPathExpressionException {
+    public HashMap<String, ArrayList<String>> getIndexingTable(ArrayList<String> indexingTerms) throws XPathExpressionException, IOException {
 
         File path = new File("src/XMLDocuments");
         HashMap<String, ArrayList<String>> indexMap = new HashMap<>();
@@ -88,9 +129,20 @@ public class Indexing {
         return indexMap;
     }
 
-    public ArrayList<String> searchInTable(String query, HashMap<String, ArrayList<String>> indexMap) {
+    public ArrayList<String> searchInTable(String query, HashMap<String, ArrayList<String>> indexMap) throws IOException {
 
-        String[] tokenizedQuery = query.split(" ");
+        ArrayList<String> tokenizedQuery =
+                Stream.of(query.toLowerCase().split(" "))
+                        .collect(Collectors.toCollection(ArrayList<String>::new));
+        tokenizedQuery.removeAll(loadStopwords());
+
+        for(String token : tokenizedQuery) {
+
+            PorterStemmer stemmer = new PorterStemmer();
+            String stemmedWord = stemmer.stem(token);
+
+        }
+
         ArrayList<String> documents = new ArrayList<>();
 
         for(String token: tokenizedQuery) {
@@ -130,6 +182,7 @@ public class Indexing {
         int[] query_TF_Matrix = new int[indexingTerms.size()];
 
         for(int i = 0; i < indexingTerms.size(); i++) {
+
             if(query.contains(indexingTerms.get(i))) {
                 query_TF_Matrix[i] = 1;
             }

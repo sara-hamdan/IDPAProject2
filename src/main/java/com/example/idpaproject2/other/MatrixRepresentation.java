@@ -9,7 +9,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class MatrixRepresentation {
 
@@ -21,6 +27,11 @@ public class MatrixRepresentation {
         return parser.DOMParser();
     }
 
+    public List<String> loadStopwords() throws IOException {
+
+        List<String> stopwords = Files.readAllLines(Paths.get("src/english_stopwords.txt"));
+        return stopwords;
+    }
     public ArrayList<String> getIndexingNodes(Document document) {
 
         ArrayList<String> indexingNodes = new ArrayList<>();
@@ -31,11 +42,20 @@ public class MatrixRepresentation {
             for(int i = 0; i < nodeList.getLength(); i++) {
                 Element el = (Element) nodeList.item(i);
                 String textualContent = el.getTextContent();
-                String[] tokenizedArr = textualContent.split(" ");
+                ArrayList<String> tokenizedArr =
+                        Stream.of(textualContent.toLowerCase().split(" "))
+                                .collect(Collectors.toCollection(ArrayList<String>::new));
+                // List<String> tokenizedArr = Arrays.asList(textualContent.split(" "));
+                tokenizedArr.removeAll(loadStopwords());
 
                 for (String s : tokenizedArr) {
-                    if (!(s.equalsIgnoreCase("")) && !(s.equalsIgnoreCase(" ")))
-                        indexingNodes.add(s);
+                    if (!(s.equalsIgnoreCase("")) && !(s.equalsIgnoreCase(" "))) {
+
+                        PorterStemmer stemmer = new PorterStemmer();
+                        String stemmedWord = stemmer.stem(s);  //get the stemmed word
+                        indexingNodes.add(stemmedWord);
+
+                    }
                 }
             }
         } catch (Exception e) {
@@ -49,13 +69,14 @@ public class MatrixRepresentation {
     public ArrayList<String> getLeafNodes(Document document) {
 
         ArrayList<String> leafNodes = new ArrayList<>();
+        PorterStemmer porterStemmer = new PorterStemmer();
 
         try {
             final XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//*[count(./*) = 0]");
             final NodeList nodeList = (NodeList) xpath.evaluate(document, XPathConstants.NODESET);
             for(int i = 0; i < nodeList.getLength(); i++) {
                 Element el = (Element) nodeList.item(i);
-                leafNodes.add(el.getNodeName());
+                leafNodes.add(porterStemmer.stem(el.getNodeName().toLowerCase()));
 
             }
         } catch (Exception e) {
@@ -145,7 +166,7 @@ public class MatrixRepresentation {
         return mapper;
     }
 
-    public int[][] TF_Matrix(Document document1, ArrayList<String> mergedIndexingNodes, ArrayList<String> mergedStructure) {
+    public int[][] TF_Matrix(Document document1, ArrayList<String> mergedIndexingNodes, ArrayList<String> mergedStructure) throws IOException {
 
         int[][] tf_matrix = new int[getUniqueContext(mergedStructure).size()][getUniqueIndexingNodes(mergedIndexingNodes).size()];
         ArrayList<String> indexingNodesOf1 = getUniqueIndexingNodes(getIndexingNodes(document1));
@@ -153,35 +174,46 @@ public class MatrixRepresentation {
         for (int i = 0; i < getUniqueContext(mergedStructure).size(); i++) {
             for (int j = 0; j < getUniqueIndexingNodes(mergedIndexingNodes).size(); j++) {
 
-                NodeList nodeList1 = document1.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);
+                NodeList nodeList1 = document1.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length - 1]);
                 ArrayList<String> terms = new ArrayList<>();
-                Map<String,Integer> hm = new HashMap();
+                Map<String, Integer> hm = new HashMap();
 
                 for (int k = 0; k < nodeList1.getLength(); k++) {
                     String textualContent = nodeList1.item(k).getTextContent();
-                    String[] tokenizedArr = textualContent.split(" ");
+
+                    ArrayList<String> tokenizedArr =
+                            Stream.of(textualContent.toLowerCase().split(" "))
+                                    .collect(Collectors.toCollection(ArrayList<String>::new));
+                    // List<String> tokenizedArr = Arrays.asList(textualContent.split(" "));
+                    tokenizedArr.removeAll(loadStopwords());
 
                     for (String s : tokenizedArr) {
-                        terms.add(s);
+
+
+                            PorterStemmer stemmer = new PorterStemmer();
+                            String stemmedWord = stemmer.stem(s);  //get the stemmed word
+                            terms.add(stemmedWord);
+
+                        }
+
+
                     }
 
-                }
+                    for (String x : terms) {
 
-                for(String x:terms){
-
-                    if(!hm.containsKey(x)){
-                        hm.put(x,1);
-                    }else{
-                        hm.put(x, hm.get(x)+1);
+                        if (!hm.containsKey(x)) {
+                            hm.put(x, 1);
+                        } else {
+                            hm.put(x, hm.get(x) + 1);
+                        }
                     }
+                    System.out.println(hm);
+                    if (!hm.containsKey(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                        tf_matrix[i][j] = 0;
+                    } else tf_matrix[i][j] = hm.get(getUniqueIndexingNodes(mergedIndexingNodes).get(j));
                 }
-                System.out.println(hm);
-                if(!hm.containsKey(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
-                    tf_matrix[i][j] = 0;
-                }
-                else tf_matrix[i][j] = hm.get(getUniqueIndexingNodes(mergedIndexingNodes).get(j));
             }
-            }
+
 
 
         for (int i = 0; i < tf_matrix.length; i++) { //this equals to the row in our matrix.
@@ -217,11 +249,13 @@ public class MatrixRepresentation {
                     NodeList nodeList1 = document1.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);
                     NodeList nodeList2 = document2.getElementsByTagName(getUniqueContext(mergedStructure).get(i).split("/")[getUniqueContext(mergedStructure).get(i).split("/").length-1]);
                     for (int k = 0; k < nodeList1.getLength(); k++) {
-                        if (nodeList1.item(k).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+
+                        PorterStemmer stemmer = new PorterStemmer();
+                        if (stemmer.stem(nodeList1.item(k).getTextContent().toLowerCase()).contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
 
                                 idf_matrix[i][j] = Math.log(3 / 1);
                                 for (int l = 0; l < nodeList2.getLength(); l++) {
-                                    if (nodeList2.item(l).getTextContent().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                                    if (stemmer.stem(nodeList2.item(l).getTextContent().toLowerCase()).contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
                                         idf_matrix[i][j] = Math.log(3.0/2);
                                         break;
                                     }
