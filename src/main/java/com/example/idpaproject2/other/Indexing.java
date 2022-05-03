@@ -105,6 +105,19 @@ public class Indexing {
         Set<String> set = new LinkedHashSet<>(terms);
         return new ArrayList<String>(set);
     }
+
+    public int getFileCount() {
+        int count = 0;
+        File path = new File("src/XMLDocuments");
+        File [] files = path.listFiles();
+        for (int i = 0; i < files.length; i++){
+            if (files[i].isFile()){ //this line weeds out other directories/folders
+                count++;
+
+            }
+        }
+        return count;
+    }
     public HashMap<String, ArrayList<String>> getIndexingTable(ArrayList<String> indexingTerms) throws XPathExpressionException, IOException {
 
         File path = new File("src/XMLDocuments");
@@ -157,15 +170,18 @@ public class Indexing {
 
     }
 
-    public HashMap <String, int[]> getDocumentMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) {
+    public HashMap <String, double[]> getDocumentMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) throws XPathExpressionException, IOException {
 
 
-       HashMap <String, int[]> tf_matrices_map = new HashMap <String, int[]>();
+        HashMap<String, ArrayList<String>> indexTable = getIndexingTable(indexingTerms);
+       HashMap <String, double[]> tf_matrices_map = new HashMap <String, double[]>();
         for(String document: documentSet) {
-            int[] TF_Matrix = new int[indexingTerms.size()];
+            double[] TF_Matrix = new double[indexingTerms.size()];
             for(int i = 0; i < indexingTerms.size(); i++) {
                 if(indexMap.get(indexingTerms.get(i)).contains(document)) {
-                    TF_Matrix[i] = 1;
+                    TF_Matrix[i] =
+                            Math.log((double) getFileCount()/indexTable.get(indexingTerms.get(i)).size());
+
                 }
             }
 
@@ -180,10 +196,11 @@ public class Indexing {
     public int[] query_TF_Matrix(String query, ArrayList<String> indexingTerms) {
 
         int[] query_TF_Matrix = new int[indexingTerms.size()];
+        PorterStemmer stemmer = new PorterStemmer();
 
         for(int i = 0; i < indexingTerms.size(); i++) {
 
-            if(query.contains(indexingTerms.get(i))) {
+            if(stemmer.stem(query).contains(indexingTerms.get(i))) {
                 query_TF_Matrix[i] = 1;
             }
         }
@@ -192,7 +209,7 @@ public class Indexing {
 
     }
 
-    public HashMap<String, Double> getSimilarity(int[] query_TF_Matrix, HashMap<String, int[]> TF_matrices_map) {
+    public HashMap<String, Double> getSimilarity(int[] query_TF_Matrix, HashMap<String, double[]> TF_matrices_map) {
 
         HashMap<String, Double> similarityMap = new HashMap<>();
         double squareSumQuery = 0;
@@ -200,14 +217,14 @@ public class Indexing {
             squareSumQuery += Math.pow(query_TF_Matrix[i], 2);
         }
 
-        for (Map.Entry<String, int[]> e : TF_matrices_map.entrySet()) {
-            int[] multiplied = new int[query_TF_Matrix.length];
-            int[] oneDocumentMatrix = e.getValue();
+        for (Map.Entry<String, double[]> e : TF_matrices_map.entrySet()) {
+            double[] multiplied = new double[query_TF_Matrix.length];
+            double[] oneDocumentMatrix = e.getValue();
             double squareSumDocument = 0.0;
             Double cosineSim;
-            int sum = 0;
+            double sum = 0.0;
             for(int i = 0; i <oneDocumentMatrix.length; i++) {
-                multiplied[i] = query_TF_Matrix[i]*oneDocumentMatrix[i];
+                multiplied[i] = (double) (query_TF_Matrix[i]*oneDocumentMatrix[i]);
             }
             for(int i = 0; i < multiplied.length; i++) {
                 sum += multiplied[i];

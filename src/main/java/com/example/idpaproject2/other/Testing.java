@@ -153,7 +153,8 @@ public class Testing {
         }
 
         Double sim = mp.computeCosineSim(mp.computeNumCosine(tf_idf_matrix, tf_idf_matrix2), mp.computeDenomCosine(tf_idf_matrix, tf_idf_matrix2) );
-        System.out.println(sim);
+        System.out.println(sim);;
+
 
     }
 
