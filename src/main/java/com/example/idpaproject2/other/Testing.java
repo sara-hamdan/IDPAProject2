@@ -132,6 +132,8 @@ public class Testing {
         System.out.println(sim);
 
 
+        PorterStemmer stem = new PorterStemmer();
+
 
 
 

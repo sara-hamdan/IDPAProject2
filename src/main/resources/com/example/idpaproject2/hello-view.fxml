@@ -1,16 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.idpaproject2.HelloController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="1016.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.idpaproject2.HelloController">
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+    <children>
+        <HBox layoutX="30.0" layoutY="30.0" prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <Label minWidth="80.0" text="Document A">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Label>
+                <TextField fx:id="file_a_input" editable="false" prefHeight="25.0" prefWidth="750.0">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </TextField>
+                <Button fx:id="browse_a" mnemonicParsing="false" onAction="#onBrowseA" text="Browse">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+        <HBox layoutX="30.0" layoutY="30.0" prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <Label minWidth="80.0" text="Document B">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Label>
+                <TextField fx:id="file_b_input" editable="false" prefHeight="25.0" prefWidth="750.0">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </TextField>
+                <Button fx:id="browse_b" mnemonicParsing="false" onAction="#onBrowseB" text="Browse">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+        <HBox prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <Label minWidth="80.0" text="Similarity:">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Label>
+                <TextField fx:id="similarity_out" promptText="Click compute to solve">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </TextField>
+                <Button mnemonicParsing="false" onAction="#onComputeSimilarity" text="Compute">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+        <Separator prefWidth="200.0" />
+        <HBox prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <TextField fx:id="search_box" prefHeight="25.0" prefWidth="420.0" promptText="Please enter search query">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </TextField>
+                <ComboBox fx:id="vector_selector" prefWidth="150.0" value="TF">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="TF" />
+                            <String fx:value="IDF" />
+                            <String fx:value="TF/IDF" />
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+                <ComboBox fx:id="search_type_selector" prefWidth="150.0" value="Flat Text">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Flat Text" />
+                            <String fx:value="Structural" />
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+                <CheckBox fx:id="indexing_checkbox" mnemonicParsing="false" text="Indexing">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </CheckBox>
+                <Button fx:id="search_btn" mnemonicParsing="false" onAction="#onSearchButtonClicked" text="Search">
+                    <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+        <TextArea fx:id="output_text_box" prefHeight="450.0" prefWidth="960.0" />
+    </children>
 </VBox>

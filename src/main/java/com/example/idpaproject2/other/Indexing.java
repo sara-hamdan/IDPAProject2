@@ -23,13 +23,13 @@ public class Indexing {
     public StringBuilder flattenXMLWithStructure(Document document) throws XPathExpressionException, IOException {
 
 
-            PorterStemmer stemmer = new PorterStemmer();
+        PorterStemmer stemmer = new PorterStemmer();
 
 
         final XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//*[count(./*) = 0]");
         final NodeList nodeList = (NodeList) xpath.evaluate(document, XPathConstants.NODESET);
         StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < nodeList.getLength(); i++) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
             Element el = (Element) nodeList.item(i);
             stringBuilder.append(stemmer.stem(el.getNodeName().toLowerCase()) + ": ");
             ArrayList<String> tokenizedArr =
@@ -37,9 +37,9 @@ public class Indexing {
                             .collect(Collectors.toCollection(ArrayList<String>::new));
             tokenizedArr.removeAll(loadStopwords());
 
-            for(String token : tokenizedArr) {
+            for (String token : tokenizedArr) {
                 String stemmedWord = stemmer.stem(token);
-                stringBuilder.append(stemmedWord + " "  );
+                stringBuilder.append(stemmedWord + " ");
             }
 
             stringBuilder.append("\n");
@@ -50,16 +50,29 @@ public class Indexing {
         return stringBuilder;
     }
 
-    public StringBuilder flattenXMLWithoutStructure(Document document) throws XPathExpressionException {
+    public StringBuilder flattenXMLWithoutStructure(Document document) throws XPathExpressionException, IOException {
 
+        PorterStemmer stemmer = new PorterStemmer();
         final XPathExpression xpath = XPathFactory.newInstance().newXPath().compile("//*[count(./*) = 0]");
         final NodeList nodeList = (NodeList) xpath.evaluate(document, XPathConstants.NODESET);
         StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < nodeList.getLength(); i++) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
             Element el = (Element) nodeList.item(i);
-            stringBuilder.append(el.getTextContent() + " \n");
+
+            ArrayList<String> tokenizedArr =
+                    Stream.of((el.getTextContent().toLowerCase()).split(" "))
+                            .collect(Collectors.toCollection(ArrayList<String>::new));
+            tokenizedArr.removeAll(loadStopwords());
+
+            for (String token : tokenizedArr) {
+                String stemmedWord = stemmer.stem(token);
+                stringBuilder.append(stemmedWord + " ");
+            }
+
+            stringBuilder.append("\n");
 
         }
+
         System.out.println(stringBuilder.toString());
 
         return stringBuilder;
@@ -79,9 +92,9 @@ public class Indexing {
         String[] genericTerms = {"Movie", "Professor", "Student", "Song"};
         File path = new File("src/XMLDocuments");
 
-        File [] files = path.listFiles();
-        for (int i = 0; i < files.length; i++){
-            if (files[i].isFile()){ //this line weeds out other directories/folders
+        File[] files = path.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isFile()) { //this line weeds out other directories/folders
                 Document document = mp.parseXML(files[i].toString());
                 terms.addAll(mp.getUniqueIndexingNodes(mp.getIndexingNodes(document)));
                 terms.addAll(mp.getLeafNodes(document));
@@ -94,14 +107,15 @@ public class Indexing {
 
         tokenizedQuery.removeAll(loadStopwords());
 
-        for(String token : tokenizedQuery) {
+        for (String token : tokenizedQuery) {
 
             PorterStemmer stemmer = new PorterStemmer();
             String stemmedWord = stemmer.stem(token);
 
+            terms.add(stemmedWord);
         }
-         //get the stemmed word
-        terms.addAll(tokenizedQuery);
+        //get the stemmed word
+
         Set<String> set = new LinkedHashSet<>(terms);
         return new ArrayList<String>(set);
     }
@@ -109,34 +123,35 @@ public class Indexing {
     public int getFileCount() {
         int count = 0;
         File path = new File("src/XMLDocuments");
-        File [] files = path.listFiles();
-        for (int i = 0; i < files.length; i++){
-            if (files[i].isFile()){ //this line weeds out other directories/folders
+        File[] files = path.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isFile()) { //this line weeds out other directories/folders
                 count++;
 
             }
         }
         return count;
     }
+
     public HashMap<String, ArrayList<String>> getIndexingTable(ArrayList<String> indexingTerms) throws XPathExpressionException, IOException {
 
         File path = new File("src/XMLDocuments");
         HashMap<String, ArrayList<String>> indexMap = new HashMap<>();
 
-        for(String s: indexingTerms)
+        for (String s : indexingTerms)
             indexMap.put(s, new ArrayList<String>());
 
-        File [] files = path.listFiles();
-        for (int i = 0; i < files.length; i++){
-            if (files[i].isFile()){ //this line weeds out other directories/folders
+        File[] files = path.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isFile()) { //this line weeds out other directories/folders
                 Document document = mp.parseXML(files[i].toString());
                 StringBuilder sb = flattenXMLWithStructure(document);
 
-                for(String s: indexingTerms) {
-                    if(sb.toString().contains(s)) {
+                for (String s : indexingTerms) {
+                    if (sb.toString().contains(s)) {
                         indexMap.get(s).add(files[i].toString());
                     }
-                 }
+                }
             }
         }
         return indexMap;
@@ -150,19 +165,11 @@ public class Indexing {
                         .collect(Collectors.toCollection(ArrayList<String>::new));
         tokenizedQuery.removeAll(loadStopwords());
 
-        for(String token : tokenizedQuery) {
-
-
-            String stemmedWord = stemmer.stem(token);
-
-        }
 
         ArrayList<String> documents = new ArrayList<>();
-
-        for(String token: tokenizedQuery) {
-
-            if(indexMap.containsKey(token)) {
-                documents.addAll(indexMap.get(token));
+        for (String token : tokenizedQuery) {
+            if (indexMap.containsKey(stemmer.stem(token))) {
+                documents.addAll(indexMap.get(stemmer.stem(token)));
             }
         }
 
@@ -171,22 +178,49 @@ public class Indexing {
 
     }
 
-    public HashMap <String, double[]> getDocumentMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) throws XPathExpressionException, IOException {
+
+    public HashMap <String, double[]> getDocumentTFMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) throws XPathExpressionException, IOException {
+
+        HashMap<String, ArrayList<String>> indexTable = getIndexingTable(indexingTerms);
+        HashMap <String, double[]> tf_matrices_map = new HashMap <String, double[]>();
+        int c = 0;
+        for(String document: documentSet) {
+            double[] TF_Matrix = new double[indexingTerms.size()];
+            for(int i = 0; i < indexingTerms.size(); i++) {
+                c = i;
+                if(indexMap.get(indexingTerms.get(i)).contains(document)) {
+
+                    TF_Matrix[i] = Math.log((double) getFileCount()/indexMap.get(indexingTerms.get(i)).size());
+                }
+                System.out.print(indexingTerms.get(i));
+                System.out.print(TF_Matrix[c] + " ");
+            }
+            tf_matrices_map.put(document, TF_Matrix);
+            System.out.println();
+        }
+
+        return tf_matrices_map;
+    }
+
+    public HashMap <String, double[]> getDocumentIDFMatrices(ArrayList<String> documentSet, ArrayList<String> indexingTerms, HashMap<String, ArrayList<String>> indexMap) throws XPathExpressionException, IOException {
 
 
         HashMap<String, ArrayList<String>> indexTable = getIndexingTable(indexingTerms);
        HashMap <String, double[]> tf_matrices_map = new HashMap <String, double[]>();
+       int c = 0;
         for(String document: documentSet) {
             double[] TF_Matrix = new double[indexingTerms.size()];
             for(int i = 0; i < indexingTerms.size(); i++) {
+                c = i;
                 if(indexMap.get(indexingTerms.get(i)).contains(document)) {
-                    TF_Matrix[i] =
-                            Math.log((double) getFileCount()/indexTable.get(indexingTerms.get(i)).size());
 
+                    TF_Matrix[i] = Math.log((double) getFileCount()/indexMap.get(indexingTerms.get(i)).size());
                 }
+                System.out.print(indexingTerms.get(i));
+                System.out.print(TF_Matrix[c] + " ");
             }
-
             tf_matrices_map.put(document, TF_Matrix);
+            System.out.println();
         }
 
         return tf_matrices_map;
@@ -194,16 +228,39 @@ public class Indexing {
 
 
 
-    public int[] query_TF_Matrix(String query, ArrayList<String> indexingTerms) {
+    public int[] query_TF_Matrix(String query, ArrayList<String> indexingTerms) throws IOException {
 
         int[] query_TF_Matrix = new int[indexingTerms.size()];
         PorterStemmer stemmer = new PorterStemmer();
+        ArrayList<String> tokenizedQuery =
+                Stream.of(query.toLowerCase().split(" "))
+                        .collect(Collectors.toCollection(ArrayList<String>::new));
+        tokenizedQuery.removeAll(loadStopwords());
+
+        HashMap<String, Integer> occurencesMap = new HashMap<>();
+
+        for(String token : tokenizedQuery) {
+            String stemmedWord = stemmer.stem(token);
+
+            if (!occurencesMap.containsKey(stemmedWord)) {
+                occurencesMap.put(stemmedWord, 1);
+            } else {
+                occurencesMap.put(stemmedWord, occurencesMap.get(stemmedWord) + 1);
+            }
+
+        }
 
         for(int i = 0; i < indexingTerms.size(); i++) {
 
-            if(stemmer.stem(query).contains(indexingTerms.get(i))) {
-                query_TF_Matrix[i] = 1;
+            for (String token : tokenizedQuery) {
+                String stemmed = stemmer.stem(token);
+                if (stemmed.equals(indexingTerms.get(i))) {
+                    System.out.print(indexingTerms.get(i) + " ");
+                    query_TF_Matrix[i] = occurencesMap.get(stemmed);
+                    break;
+                }
             }
+            System.out.print(query_TF_Matrix[i] + " ");
         }
 
         return query_TF_Matrix;
@@ -225,14 +282,15 @@ public class Indexing {
             Double cosineSim;
             double sum = 0.0;
             for(int i = 0; i <oneDocumentMatrix.length; i++) {
-                multiplied[i] = (double) (query_TF_Matrix[i]*oneDocumentMatrix[i]);
-            }
-            for(int i = 0; i < multiplied.length; i++) {
+                multiplied[i] = (query_TF_Matrix[i]*oneDocumentMatrix[i]);
                 sum += multiplied[i];
             }
+
             for(int i = 0; i < oneDocumentMatrix.length; i++) {
                 squareSumDocument += Math.pow(oneDocumentMatrix[i], 2);
             }
+
+            System.out.println(sum+ " " + squareSumDocument + " " + squareSumQuery);
 
             cosineSim = sum/Math.sqrt(squareSumQuery*squareSumDocument);
 
@@ -244,7 +302,6 @@ public class Indexing {
     }
 
     public HashMap<String, Double> rankedSimilarityMap(HashMap<String, Double> similarityMap) {
-
 
         // Create a list from elements of HashMap
         List<Map.Entry<String, Double> > list =
