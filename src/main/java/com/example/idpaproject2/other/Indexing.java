@@ -144,6 +144,7 @@ public class Indexing {
 
     public ArrayList<String> searchInTable(String query, HashMap<String, ArrayList<String>> indexMap) throws IOException {
 
+        PorterStemmer stemmer = new PorterStemmer();
         ArrayList<String> tokenizedQuery =
                 Stream.of(query.toLowerCase().split(" "))
                         .collect(Collectors.toCollection(ArrayList<String>::new));
@@ -151,7 +152,7 @@ public class Indexing {
 
         for(String token : tokenizedQuery) {
 
-            PorterStemmer stemmer = new PorterStemmer();
+
             String stemmedWord = stemmer.stem(token);
 
         }

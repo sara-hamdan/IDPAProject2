@@ -345,10 +345,54 @@ public class MatrixRepresentation {
         return DenomCosine;
     }
 
+    public Double computeCosineSimTF(Double num, Double denom) {
+
+        return num/denom;
+    }
+
+
+    public Double computeNumCosineTF(int[][] tf_idf_1, int[][] tf_idf_2) {
+
+        Double NumCosine = 0.0;
+
+        for(int i = 0; i < tf_idf_1.length; i++) {
+            for(int j = 0; j < tf_idf_1[i].length; j++) {
+                NumCosine += tf_idf_1[i][j]*tf_idf_2[i][j];
+            }
+        }
+
+        return NumCosine;
+    }
+
+
+    public Double computeDenomCosineTF(int[][] tf_idf_1, int[][] tf_idf_2) {
+
+        Double DenomCosine;
+        Double sumSquareWeights1 = 0.0;
+        Double sumSquareWeights2 = 0.0;
+
+        for(int i = 0; i < tf_idf_1.length; i++) {
+            for(int j = 0; j < tf_idf_1[i].length; j++) {
+                sumSquareWeights1 += tf_idf_1[i][j]*tf_idf_1[i][j];
+            }
+        }
+
+        for(int i = 0; i < tf_idf_2.length; i++) {
+            for(int j = 0; j < tf_idf_2[i].length; j++) {
+                sumSquareWeights2 += tf_idf_2[i][j]*tf_idf_2[i][j];
+            }
+        }
+
+        DenomCosine = Math.sqrt(sumSquareWeights1*sumSquareWeights2);
+
+        return DenomCosine;
+    }
+
     public Double computeCosineSim(Double num, Double denom) {
 
         return num/denom;
     }
+
 
 
 }
