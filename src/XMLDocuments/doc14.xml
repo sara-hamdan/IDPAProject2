@@ -1,0 +1,10 @@
+<students>
+  <student>
+    <name>Jane Doe</name>
+    <major>CENT</major>
+  </student>
+  <student>
+    <name>John Doe</name>
+    <major>PHYS</major>
+  </student>
+</students>

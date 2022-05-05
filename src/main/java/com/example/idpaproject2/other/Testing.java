@@ -21,8 +21,8 @@ public class Testing {
     public static void main(String[] args) throws ParserConfigurationException, XPathExpressionException, IOException {
 
         MatrixRepresentation mp = new MatrixRepresentation();
-        Document document1 = mp.parseXML("src/XMLDocuments/doc1.xml");
-        Document document2 = mp.parseXML("src/XMLDocuments/doc2.xml");
+        Document document1 = mp.parseXML("src/XMLDocuments/doc14.xml");
+        Document document2 = mp.parseXML("src/XMLDocuments/doc15.xml");
 
         ArrayList<String> indexingNodes1 = mp.getUniqueIndexingNodes(mp.getIndexingNodes(document1));
         ArrayList<String> indexingNodes2 = mp.getUniqueIndexingNodes(mp.getIndexingNodes(document2));
@@ -125,14 +125,13 @@ public class Testing {
 
         System.out.println("Cosine Similarity with TF weights: ");
         Double sim_TF = mp.computeCosineSimTF(mp.computeNumCosineTF(TF_1, TF_2), mp.computeDenomCosineTF(TF_1, TF_2) );
-        System.out.println(sim);
+        System.out.println(sim_TF);
 
         System.out.println("Cosine Similarity with IDF weights: ");
         Double sim_IDF = mp.computeCosineSim(mp.computeNumCosine(IDF_1, IDF_2), mp.computeDenomCosine(IDF_1, IDF_2) );
-        System.out.println(sim);
+        System.out.println(sim_IDF);
 
 
-        PorterStemmer stem = new PorterStemmer();
 
 
 
@@ -141,7 +140,6 @@ public class Testing {
 
 
     }
-
 
     }
 

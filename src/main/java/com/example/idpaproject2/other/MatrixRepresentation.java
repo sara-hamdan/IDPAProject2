@@ -251,11 +251,11 @@ public class MatrixRepresentation {
                     for (int k = 0; k < nodeList1.getLength(); k++) {
 
                         PorterStemmer stemmer = new PorterStemmer();
-                        if (stemmer.stem(nodeList1.item(k).getTextContent().toLowerCase()).contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                        if (nodeList1.item(k).getTextContent().toLowerCase().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
 
                                 idf_matrix[i][j] = Math.log(3 / 1);
                                 for (int l = 0; l < nodeList2.getLength(); l++) {
-                                    if (stemmer.stem(nodeList2.item(l).getTextContent().toLowerCase()).contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
+                                    if (nodeList2.item(l).getTextContent().toLowerCase().contains(getUniqueIndexingNodes(mergedIndexingNodes).get(j))) {
                                         idf_matrix[i][j] = Math.log(3.0/2);
                                         break;
                                     }
